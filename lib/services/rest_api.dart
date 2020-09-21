@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import '../models/RegisterModel.dart';
 
 class CallAPI {
   _setHeader() => {
@@ -19,5 +20,17 @@ class CallAPI {
       body: jsonEncode(data),
       headers: _setHeader(),
     );
+  }
+
+  //Read Employee Detail
+  Future<RegisterModel> getEmployee(data) async {
+    // var fullURL = baseApiURL + apiURL;
+    final response = await http.post(baseApiURL + 'register',
+        body: jsonEncode(data), headers: _setHeader());
+    if (response.statusCode == 200) {
+      return registerModelFromJson(response.body);
+    } else {
+      return null;
+    }
   }
 }

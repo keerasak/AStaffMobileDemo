@@ -1,3 +1,7 @@
+import 'package:baacstaff/models/RegisterModel.dart';
+import 'package:baacstaff/services/rest_api.dart';
+import 'package:baacstaff/utils/utils.dart';
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 
 class EmployeeDetailScreen extends StatefulWidget {
@@ -8,6 +12,34 @@ class EmployeeDetailScreen extends StatefulWidget {
 }
 
 class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
+  //เรียกใช้ models
+  RegisterModel _dataEmployee;
+
+  @override
+  void initState() {
+    super.initState();
+    readEmployee();
+  }
+
+//call api
+  void readEmployee() async {
+    //check conect internet
+    var result = await Connectivity().checkConnectivity();
+
+    if (result == ConnectivityResult.none) {
+      Utility.getInstance().showAlertDialog(
+          context, 'ออฟไลน์', 'คุณยังไม่ได้เชื่อมต่ออินเตอร์เนต');
+      print("ไม่มีการเชื่อมต่อ");
+    } else {
+      var empData = {"empid": "5601965", "cizid": "7127225663620"};
+      var response = await CallAPI().getEmployee(empData);
+      print(response.data.firstname);
+      setState(() {
+        _dataEmployee = response;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,7 +50,7 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
         ListTile(
           leading: Icon(Icons.person),
           title: Text('ชื่อ-สกุล'),
-          subtitle: Text('กีระศักดิ์ พิทยาพละ'),
+          // subtitle: Text('${_dataEmployee.data.firstname}'),
         ),
         ListTile(
           leading: Icon(Icons.credit_card),

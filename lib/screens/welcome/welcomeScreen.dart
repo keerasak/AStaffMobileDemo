@@ -4,12 +4,12 @@ class WelcomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.redAccent,
+      backgroundColor: Colors.green,
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            "Welcome to INSIDER",
+            "Welcome to ..........",
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 40,
@@ -17,9 +17,10 @@ class WelcomeScreen extends StatelessWidget {
             ),
           ),
           Center(
-            child: Icon(
-              Icons.visibility,
-              size: 200,
+            child: Image.asset(
+              'assets/images/logo1.png',
+              width: 120,
+              height: 120,
             ),
           ),
           SizedBox(
@@ -30,13 +31,13 @@ class WelcomeScreen extends StatelessWidget {
               Navigator.pushNamed(context, '/register');
               // Navigator.pushReplacementNamed(context, '/register');
             },
-            color: Colors.red,
-            splashColor: Colors.redAccent,
+            color: Colors.white60,
+            splashColor: Colors.white60,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Text(
-                'Close your eyes',
-                style: TextStyle(fontSize: 30),
+                'เริ่มต้นใช้งาน',
+                style: TextStyle(fontSize: 20),
               ),
             ),
           )

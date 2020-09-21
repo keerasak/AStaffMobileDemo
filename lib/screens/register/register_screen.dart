@@ -1,8 +1,9 @@
 import 'dart:convert';
-
+import 'package:baacstaff/utils/utils.dart';
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
-import 'package:baacstaff/models/register_model.dart';
 import 'package:baacstaff/services/rest_api.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RegisterScreen extends StatefulWidget {
   RegisterScreen({Key key}) : super(key: key);
@@ -24,6 +25,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
+        decoration: BoxDecoration(
+            image: DecorationImage(
+                //จากที่โหลดใช้ image: AssetImage(Path),
+                image: NetworkImage(
+                    'https://i.pinimg.com/originals/b6/d0/64/b6d0641b836797eea79669006b2885da.jpg'),
+                fit: BoxFit.fill)),
         child: SingleChildScrollView(
           padding: const EdgeInsets.only(top: 100),
           child: Form(
@@ -34,7 +41,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 Column(
                   children: [
                     Image(
-                      image: AssetImage('assets/images/trex.png'),
+                      image: AssetImage('assets/images/logo1.png'),
                       width: 150,
                       height: 150,
                     ),
@@ -54,9 +61,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       child: Column(
                         children: [
                           TextFormField(
+                            maxLength: 7,
+                            initialValue: '5601965',
                             validator: (value) {
                               if (value.isEmpty) {
-                                return "Please enter username";
+                                return "Please enter รหัสพนักงาน";
+                              } else if (value.length != 7) {
+                                return ("กรุณากรอกรหัสพนักงาน 7 หลัก");
                               } else {
                                 return null;
                               }
@@ -72,11 +83,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 Icons.person,
                                 size: 20,
                               ),
-                              labelText: 'Username',
-                              hintText: 'Username',
+                              labelText: 'รหัสพนักงาน',
+                              hintText: 'รหัสพนักงาน',
                             ),
                           ),
                           TextFormField(
+                            maxLength: 13,
+                            initialValue: '7127225663620',
                             validator: (value) {
                               if (value.isEmpty) {
                                 return "Please enter National ID";
@@ -109,20 +122,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 RaisedButton(
                   onPressed: () {
-                    // Navigator.pushNamed(context, '/consent');
                     if (formKey.currentState.validate()) {
                       formKey.currentState.save();
                       var data = {"empid": empID, "cizid": cizID};
                       _register(data);
                     }
+                    //Navigator.pushNamed(context, '/consent');
                   },
-                  color: Colors.red,
+                  color: Colors.green,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 30, vertical: 10),
                     child: Text(
-                      'Conspire',
-                      style: TextStyle(fontSize: 24, color: Colors.white),
+                      'ลงทะเบียน',
+                      style: TextStyle(fontSize: 24, color: Colors.white70),
                     ),
                   ),
                   shape: RoundedRectangleBorder(
@@ -139,8 +152,37 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   // function check api
   void _register(data) async {
-    var response = await CallAPI().postData(data, "/register");
-    var body = json.decode(response.body);
-    print(body);
+    //check conect internet
+    var result = await Connectivity().checkConnectivity();
+
+    if (result == ConnectivityResult.none) {
+      Utility.getInstance().showAlertDialog(
+          context, 'ออฟไลน์', 'คุณยังไม่ได้เชื่อมต่ออินเตอร์เนต');
+      print("ไม่มีการเชื่อมต่อ");
+    } else {
+      var response = await CallAPI().postData(data, "/register");
+      var body = json.decode(response.body);
+      print(body);
+      // print(body['code']);
+      // print(body['data']['empid']);
+      if (body['code'] == '200') {
+        //ส่งไปหน้า consent
+        //สร้างตัวแปรประะเภท sharePrefference เก็บข้อมูลในแอพ
+        SharedPreferences sharedPreferences =
+            await SharedPreferences.getInstance();
+
+        //keep date
+        sharedPreferences.setString('storeEmpID', body['data']['empid']);
+        sharedPreferences.setString('storePrename', body['data']['prename']);
+        sharedPreferences.setString(
+            'storeFirstname', body['data']['firstname']);
+        sharedPreferences.setString('storeLastname', body['data']['lastname']);
+        sharedPreferences.setInt('storeStep', 1);
+        Navigator.pushNamed(context, '/consent');
+      } else {
+        Utility.getInstance().showAlertDialog(context, 'มีข้อผิดพลาด',
+            'ข้อมูลที่ใช้ลงทะเบียนไม่ถูกต้อง กรุณาลองอีกครั้ง');
+      }
+    }
   }
 }

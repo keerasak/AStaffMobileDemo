@@ -1,5 +1,7 @@
+import 'package:baacstaff/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:pin_view/pin_view.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PincodeScreen extends StatelessWidget {
   @override
@@ -51,13 +53,12 @@ class PincodeScreen extends StatelessWidget {
                         //       return code.join();
                         //     }),
                         submit: (String pin) {
-                          showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                    title: Text("Pin received successfully."),
-                                    content: Text("Entered pin is: $pin"));
-                              });
+                          if (pin == '123456') {
+                            _checkPincode(context);
+                          } else {
+                            Utility.getInstance().showAlertDialog(context,
+                                'มีข้อผืดพลาด', 'รหัสยืนยันไม่ถูกต้อง ลองใหม่');
+                          }
                         } // gets triggered when all the fields are filled
                         ),
                   ),
@@ -66,5 +67,13 @@ class PincodeScreen extends StatelessWidget {
             ],
           ),
         ));
+  }
+
+  void _checkPincode(BuildContext context) async {
+    //สร้างตัวแปรเก็บข้อมูล Sharedref.
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    sharedPreferences.setInt('storeStep', 2);
+    //ส่งไปหน้า setpass
+    Navigator.pushReplacementNamed(context, '/setPassword');
   }
 }
